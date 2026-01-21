@@ -1,13 +1,31 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { config } from 'dotenv';
 
-export const typeOrmConfig: TypeOrmModuleOptions = {
+config();
+
+const configService = new ConfigService();
+
+export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.DB_HOST,
-  port: 5432,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  autoLoadEntities: true,
-  synchronize: false, // NEVER true in prod
-  logging: false,
+  host: configService.getOrThrow<string>('DATABASE_HOST'),
+  port: configService.getOrThrow<number>('DATABASE_PORT'),
+  username: configService.getOrThrow<string>('DATABASE_USERNAME'),
+  password: configService.getOrThrow<string>('DATABASE_PASSWORD'),
+  database: configService.getOrThrow<string>('DATABASE_NAME'),
+  entities: ['dist/**/*.entity.js'],
+  migrations: ['dist/db/migrations/*.js'],
+  //url: configService.getOrThrow<string>('DATABASE_URL'),
+  migrationsTableName: 'migrations',
+  migrationsRun: false,
+  synchronize: process.env.ENV !== 'production',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  logging: process.env.ENV !== 'production',
+  extra: {
+    connectionLimit: 10,
+  },
 };
+
+const AppDataSource = new DataSource(dataSourceOptions);
+
+export default AppDataSource;

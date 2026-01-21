@@ -3,51 +3,51 @@ import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  id!: number;
 
   @Column()
-  first_name: string;
+  first_name!: string;
 
   @Column({ nullable: true })
-  middle_name: string;
+  middle_name!: string;
 
   @Column()
-  last_name: string;
+  last_name!: string;
 
   @Column({ nullable: true })
-  name_suffix: string;
+  name_suffix!: string;
 
   @Column({ type: 'date', nullable: true })
-  dob: Date;
+  dob!: Date;
 
   @Column({ nullable: true })
-  address: string;
+  address!: string;
 
   @Column({ nullable: true })
-  city: string;
+  city!: string;
 
   @Column({ nullable: true })
-  county_name: string;
+  county_name!: string;
 
   @Column({ length: 2, nullable: true })
-  state: string;
+  state!: string;
 
   @Column({ nullable: true })
-  zip: string;
+  zip!: string;
 
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
 
   /* Normalized columns (generated in DB) */
   @Index()
   @Column({ insert: false, update: false })
-  first_name_norm: string;
+  first_name_norm!: string;
 
   @Index()
   @Column({ insert: false, update: false })
-  last_name_norm: string;
+  last_name_norm!: string;
 
   @Index()
   @Column({ insert: false, update: false })
-  full_name_norm: string;
+  full_name_norm!: string;
 }
