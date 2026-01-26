@@ -24,6 +24,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         username: configService.get('DB_USERNAME', 'peopleapp'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME', 'peopledb'),
+        url: configService.get('DB_URL'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
         logging: false,
