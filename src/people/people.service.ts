@@ -1,148 +1,110 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-// src/people/people.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './entities/person.entity';
-import {
-  SearchPersonDto,
-  PaginatedPersonResultDto,
-} from './dto/search-person.dto';
+import { SearchPersonDto, SearchResultDto } from './dto/search-person.dto';
 
 @Injectable()
 export class PeopleService {
+  private readonly logger = new Logger(PeopleService.name);
+
   constructor(
     @InjectRepository(Person)
     private readonly personRepository: Repository<Person>,
   ) {}
 
-  async search(searchDto: SearchPersonDto): Promise<PaginatedPersonResultDto> {
-    const { page = 1, limit = 50 } = searchDto;
-    const offset = (page - 1) * limit;
+  async search(searchDto: SearchPersonDto): Promise<SearchResultDto> {
+    const startTime = Date.now();
+    const {
+      firstname,
+      lastname,
+      middlename,
+      dob,
+      address,
+      city,
+      st,
+      zip,
+      page = 1,
+      limit = 100,
+    } = searchDto;
 
+    const offset = (page - 1) * limit;
     const qb = this.personRepository.createQueryBuilder('p');
 
-    // Build dynamic WHERE clause based on provided fields
-    let hasConditions = false;
+    // --- Selection (Always include ID) ---
+    qb.select([
+      'p.id',
+      'p.firstname',
+      'p.lastname',
+      'p.middlename',
+      'p.ssn',
+      'p.dob',
+      'p.address',
+      'p.city',
+      'p.st',
+      'p.zip',
+    ]);
 
-    if (searchDto.firstname) {
-      qb.andWhere('LOWER(p.firstname) LIKE LOWER(:firstname)', {
-        firstname: `%${searchDto.firstname}%`,
+    // --- Dynamic Filters ---
+
+    // 1. NAMES: Exact Match (Strict Equality)
+    // We convert input to UpperCase because your DB data is likely UPPERCASE.
+    if (firstname) {
+      // Logic: Exact match only. "Jean" != "Jeanette"
+      qb.andWhere('p.firstname = :firstname', {
+        firstname: firstname.toUpperCase(),
       });
-      hasConditions = true;
     }
-
-    if (searchDto.lastname) {
-      qb.andWhere('LOWER(p.lastname) LIKE LOWER(:lastname)', {
-        lastname: `%${searchDto.lastname}%`,
+    if (lastname) {
+      qb.andWhere('p.lastname = :lastname', {
+        lastname: lastname.toUpperCase(),
       });
-      hasConditions = true;
     }
 
-    if (searchDto.address) {
-      qb.andWhere('LOWER(p.address) LIKE LOWER(:address)', {
-        address: `%${searchDto.address}%`,
+    // Middle Name can stay ILIKE if you want flexibility, or switch to = too.
+    if (middlename) {
+      qb.andWhere('p.middlename = :middlename', {
+        middlename: middlename.toUpperCase(),
       });
-      hasConditions = true;
     }
 
-    if (searchDto.city) {
-      qb.andWhere('LOWER(p.city) LIKE LOWER(:city)', {
-        city: `%${searchDto.city}%`,
-      });
-      hasConditions = true;
+    // 2. DOB (Starts With - e.g. "1959")
+    // We keep LIKE here so users can search by Year (1980) or Full Date (19800101)
+    if (dob) {
+      qb.andWhere('p.dob LIKE :dob', { dob: `${dob}%` });
     }
 
-    if (searchDto.state) {
-      qb.andWhere('LOWER(p.st) = LOWER(:state)', {
-        state: searchDto.state,
-      });
-      hasConditions = true;
+    // 3. Location
+    if (address) {
+      // Keep address fuzzy (ILIKE) because "123 Main" vs "123 Main St" is common
+      qb.andWhere('p.address ILIKE :address', { address: `%${address}%` });
+    }
+    if (city) {
+      qb.andWhere('p.city = :city', { city: city.toUpperCase() });
+    }
+    if (st) {
+      qb.andWhere('p.st = :st', { st: st.toUpperCase() });
+    }
+    if (zip) {
+      qb.andWhere('p.zip = :zip', { zip });
     }
 
-    if (searchDto.zip) {
-      qb.andWhere('p.zip LIKE :zip', {
-        zip: `%${searchDto.zip}%`,
-      });
-      hasConditions = true;
-    }
+    // --- Pagination ---
+    qb.skip(offset).take(limit);
 
-    if (searchDto.ssn) {
-      qb.andWhere('p.ssn LIKE :ssn', {
-        ssn: `%${searchDto.ssn}%`,
-      });
-      hasConditions = true;
-    }
+    // Execute
+    const [results, total] = await qb.getManyAndCount();
+    const searchTime = Date.now() - startTime;
 
-    if (searchDto.dob) {
-      qb.andWhere('p.dob = :dob', {
-        dob: searchDto.dob,
-      });
-      hasConditions = true;
-    }
-
-    // If no conditions provided, return empty result
-    if (!hasConditions) {
-      return {
-        data: [],
-        total: 0,
-        page,
-        limit,
-        totalPages: 0,
-      };
-    }
-
-    // Order by lastname, firstname
-    qb.orderBy('p.lastname', 'ASC')
-      .addOrderBy('p.firstname', 'ASC')
-      .skip(offset)
-      .take(limit);
-
-    const [data, total] = await qb.getManyAndCount();
+    this.logger.log(`Search completed: results=${total}, time=${searchTime}ms`);
 
     return {
-      data,
+      data: results,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-    };
-  }
-
-  async findById(id: number): Promise<Person> {
-    const person = await this.personRepository.findOneBy({ id });
-    if (!person) {
-      throw new NotFoundException(`Person with ID ${id} not found`);
-    }
-    return person;
-  }
-  async getStates(): Promise<string[]> {
-    const result = await this.personRepository
-      .createQueryBuilder('p')
-      .select('DISTINCT p.st', 'st')
-      .where('p.st IS NOT NULL')
-      .orderBy('p.st', 'ASC')
-      .getRawMany();
-
-    //original
-    // return result.map((r) => r.st);
-    return result.map((r: Person) => r.st);
-  }
-
-  async getStats(): Promise<any> {
-    const total = await this.personRepository.count();
-    const states = await this.personRepository
-      .createQueryBuilder('p')
-      .select('p.st', 'state')
-      .addSelect('COUNT(*)', 'count')
-      .where('p.st IS NOT NULL')
-      .groupBy('p.st')
-      .orderBy('count', 'DESC')
-      .getRawMany();
-
-    return {
-      totalRecords: total,
-      recordsByState: states,
+      searchTime,
     };
   }
 }

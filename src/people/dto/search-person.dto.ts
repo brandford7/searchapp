@@ -1,72 +1,100 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 // src/people/dto/search-person.dto.ts
 import { IsString, IsOptional, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SearchPersonDto {
-  @ApiProperty({ required: false, description: 'First name' })
+  // --- Name Fields ---
+  @ApiPropertyOptional({
+    description: 'Exact match for first name',
+    example: 'Jean',
+  })
   @IsOptional()
   @IsString()
   firstname?: string;
 
-  @ApiProperty({ required: false, description: 'Last name' })
+  @ApiPropertyOptional({
+    description: 'Exact match for last name',
+    example: 'Lee',
+  })
   @IsOptional()
   @IsString()
   lastname?: string;
 
-  @ApiProperty({ required: false, description: 'Address' })
+  @ApiPropertyOptional({
+    description: 'Partial match for middle name',
+    example: 'Marie',
+  })
   @IsOptional()
   @IsString()
-  address?: string;
+  middlename?: string;
 
-  @ApiProperty({ required: false, description: 'City' })
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  @ApiProperty({ required: false, description: 'State (2 letter code)' })
-  @IsOptional()
-  @IsString()
-  state?: string;
-
-  @ApiProperty({ required: false, description: 'ZIP code' })
-  @IsOptional()
-  @IsString()
-  zip?: string;
-
-  @ApiProperty({ required: false, description: 'SSN' })
-  @IsOptional()
-  @IsString()
-  ssn?: string;
-
-  @ApiProperty({ required: false, description: 'Date of Birth' })
+  // --- Date Fields ---
+  @ApiPropertyOptional({
+    description: 'Date of birth (YYYYMMDD) or Year (YYYY)',
+    example: '1980',
+  })
   @IsOptional()
   @IsString()
   dob?: string;
 
-  @ApiProperty({ required: false, default: 1 })
+  // --- Location Fields ---
+  @ApiPropertyOptional({
+    description: 'Partial address match',
+    example: 'Main St',
+  })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiPropertyOptional({ description: 'City name', example: 'New York' })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiPropertyOptional({
+    description: 'State code (exact match)',
+    example: 'NY',
+  })
+  @IsOptional()
+  @IsString()
+  st?: string;
+
+  @ApiPropertyOptional({
+    description: 'Zip code (exact match)',
+    example: '10001',
+  })
+  @IsOptional()
+  @IsString()
+  zip?: string;
+
+  // --- Pagination (Kept your existing settings) ---
+  @ApiProperty({ required: false, default: 1, description: 'Page number' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiProperty({ required: false, default: 50 })
+  @ApiProperty({ required: false, default: 100, description: 'Items per page' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100)
-  limit?: number = 50;
+  @Max(500)
+  limit?: number = 100;
 }
 
+// --- Result DTOs (Unchanged, but included for context) ---
+
 export class PersonResultDto {
-  id!: number;
+  // Note: ID is type string in Typescript because it is bigint in DB
+  id!: string;
   firstname!: string;
   lastname!: string;
   middlename!: string;
-  name_suff!: string;
+  ssn!: string;
+  /*name_suff!: string;
   dob!: string;
   address!: string;
   city!: string;
@@ -74,13 +102,14 @@ export class PersonResultDto {
   st!: string;
   zip!: string;
   ssn!: string;
-  phone1!: string;
+  phone1!: string;*/
 }
 
-export class PaginatedPersonResultDto {
+export class SearchResultDto {
   data!: PersonResultDto[];
   total!: number;
   page!: number;
   limit!: number;
   totalPages!: number;
+  searchTime!: number; // Added this useful metric
 }

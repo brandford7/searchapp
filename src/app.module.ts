@@ -1,14 +1,19 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PeopleModule } from './people/people.module';
-import { ImportModule } from './import/import.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    // Enable aggressive caching for read-only workload
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 3600, // 1 hour cache
+      max: 1000, // Cache up to 1000 queries
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -16,19 +21,22 @@ import { ImportModule } from './import/import.module';
         type: 'postgres',
         host: configService.get('DB_HOST', 'localhost'),
         port: configService.get('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'password'),
+        username: configService.get('DB_USERNAME', 'peopleapp'),
+        password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME', 'peopledb'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false, // Use migrations in production
+        synchronize: false,
         logging: false,
-        maxQueryExecutionTime: 5000,
-        poolSize: 20,
+        // Optimized for read-only workload
+        extra: {
+          max: 20, // Connection pool size
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000,
+        },
       }),
       inject: [ConfigService],
     }),
     PeopleModule,
-    ImportModule,
   ],
 })
 export class AppModule {}
