@@ -8,8 +8,8 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: true,
-    credentials: true,
+    origin: '*', // WARNING: Allows everyone. Change to your frontend URL in production.
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
