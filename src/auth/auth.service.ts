@@ -80,7 +80,10 @@ export class AuthService {
     return {
       token,
       expiresAt,
-      loginUrl: `${process.env.FRONTEND_URL}/auth/temporary-login?token=${token}`,
+      // Remove or make loginUrl optional
+      loginUrl: process.env.FRONTEND_URL
+        ? `${process.env.FRONTEND_URL}/temporary-login?token=${token}`
+        : undefined,
     };
   }
 
