@@ -3,6 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PeopleModule } from './people/people.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -23,7 +26,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         port: configService.get('DB_PORT', 5432),
         username: configService.get('DB_USERNAME', 'peopleapp'),
         password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME', 'peopledb'),
+        database: configService.get('DB_NAME', 'searchappdb'),
         //url: configService.get('DB_URL'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
@@ -38,6 +41,9 @@ import { CacheModule } from '@nestjs/cache-manager';
       inject: [ConfigService],
     }),
     PeopleModule,
+    AuthModule,
+    UsersModule,
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}

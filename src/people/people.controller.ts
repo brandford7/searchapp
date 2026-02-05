@@ -1,9 +1,11 @@
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PeopleService } from './people.service';
 import { SearchPersonDto, SearchResultDto } from './dto/search-person.dto';
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query /* UseGuards*/ } from '@nestjs/common';
+//import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('people')
 @Controller('people')
+//@UseGuards(JwtAuthGuard)
 export class PeopleController {
   constructor(private readonly peopleService: PeopleService) {}
 
