@@ -18,6 +18,7 @@ export interface JwtPayload {
   username: string;
   sub: string;
   roles: string[]; // These are just the names: ['admin', 'user']
+  sessionId: string;
 }
 
 // This is what req.user will look like

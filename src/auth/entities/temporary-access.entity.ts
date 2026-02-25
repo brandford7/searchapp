@@ -29,14 +29,21 @@ export class TemporaryAccess {
   @Column({ type: 'timestamp' })
   expiresAt!: Date;
 
-  @Column({ default: false })
-  isUsed!: boolean;
+  // CHANGE: Track number of uses instead of boolean
+  @Column({ type: 'int', default: 0 })
+  usageCount!: number;
 
-  @Column({ nullable: true })
-  usedAt!: Date;
+  @Column({ type: 'int', default: 2 })
+  maxUsages!: number; // Allow 2 uses
 
-  @Column({ nullable: true })
-  ipAddress!: string;
+  @Column({ type: 'timestamp', nullable: true })
+  firstUsedAt!: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastUsedAt!: Date | null;
+
+  @Column({ type: 'simple-array', nullable: true })
+  ipAddresses!: string[]; // Track all IPs that used this token
 
   @CreateDateColumn()
   createdAt!: Date;

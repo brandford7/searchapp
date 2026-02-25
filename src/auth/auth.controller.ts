@@ -1,12 +1,12 @@
-// src/auth/auth.controller.ts
 import {
   Controller,
   Post,
   Body,
   UseGuards,
-  Request,
   Get,
   Ip,
+  Headers,
+  Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -20,13 +20,17 @@ import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
 import { RequestWithUser } from '../common/interfaces/auth.interfaces';
 
-@Controller('/api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('admin/login')
-  async adminLogin(@Body() loginDto: LoginDto) {
-    return this.authService.adminLogin(loginDto);
+  async adminLogin(
+    @Body() loginDto: LoginDto,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+  ) {
+    return this.authService.adminLogin(loginDto, ip, userAgent);
   }
 
   @Post('temporary/generate')
@@ -37,13 +41,24 @@ export class AuthController {
   }
 
   @Post('temporary/login')
-  async temporaryLogin(@Body() dto: TemporaryLoginDto, @Ip() ip: string) {
-    return this.authService.temporaryLogin(dto.token, ip);
+  async temporaryLogin(
+    @Body() dto: TemporaryLoginDto,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+  ) {
+    return this.authService.temporaryLogin(dto.token, ip, userAgent);
   }
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req: RequestWithUser) {
     return req.user;
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Request() req: any) {
+    await this.authService.logout(req.user.userId, req.user.sessionId);
+    return { message: 'Logged out successfully' };
   }
 }

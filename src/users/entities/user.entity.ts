@@ -21,13 +21,21 @@ export class User {
   username!: string;
 
   @Column({ nullable: true })
-  password!: string; // Only for admin users
+  password!: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.TEMPORARY })
   role!: UserRole;
 
   @Column({ default: true })
   isActive!: boolean;
+
+  // FIX: Add explicit type for currentSessionToken
+  @Column({ type: 'varchar', nullable: true })
+  currentSessionToken!: string | null;
+
+  // FIX: Add explicit type for lastLoginAt
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt!: Date | null;
 
   @CreateDateColumn()
   createdAt!: Date;
