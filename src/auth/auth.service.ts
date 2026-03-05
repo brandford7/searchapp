@@ -1,5 +1,11 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Get,
+  Injectable,
+  Request,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
@@ -10,6 +16,7 @@ import { TemporaryAccess } from './entities/temporary-access.entity';
 import { LoginDto, GenerateTemporaryAccessDto } from './dto/login.dto';
 import { User, UserRole } from '../users/entities/user.entity';
 import { Session } from './entities/session.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -223,7 +230,7 @@ export class AuthService {
     };
 
     // Set expiration time
-    const expiresIn = isTemporary ? '2h' : '24h';
+    const expiresIn = isTemporary ? '14d' : '30d';
     const access_token = this.jwtService.sign(payload, { expiresIn });
 
     // Calculate expiration date
@@ -371,6 +378,16 @@ export class AuthService {
       totalSessions,
       activeSessions,
       activeTemporarySessions,
+    };
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Request() req: any) {
+    return {
+      id: req.user.userId,
+      username: req.user.username,
+      role: req.user.role,
     };
   }
 }
