@@ -6,6 +6,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -45,5 +46,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     UsersModule,
     ScheduleModule.forRoot(),
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

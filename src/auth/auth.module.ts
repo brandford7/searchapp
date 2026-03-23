@@ -10,6 +10,7 @@ import { TemporaryAccess } from './entities/temporary-access.entity';
 import { Session } from './entities/session.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
+import { SeedService } from './seed/seed.service';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { User } from '../users/entities/user.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, SeedService],
   exports: [AuthService],
 })
 export class AuthModule {}
