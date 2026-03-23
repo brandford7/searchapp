@@ -37,8 +37,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Seed admin user on startup
-  //const seedService = app.get(SeedService);
-  //await seedService.seedAdminUser();
+  const seedService = app.get(SeedService);
+  await seedService.seedAdminUser();
 
   await app.listen(3000);
   console.log('People Search API running on http://localhost:3000');
