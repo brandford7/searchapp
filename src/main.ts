@@ -41,7 +41,7 @@ async function bootstrap() {
   await seedService.seedAdminUser();
 
   await app.listen(3000);
-  console.log('People Search API running on http://localhost:3000');
+  console.log('People Search API is running on http://localhost:3000');
   console.log('API Docs: http://localhost:3000/api');
 }
 bootstrap();
