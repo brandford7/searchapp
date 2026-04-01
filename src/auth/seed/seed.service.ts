@@ -30,31 +30,31 @@ export class SeedService {
   async seedAdminUser(): Promise<User> {
     try {
       const existingAdmin = await this.userRepository.findOne({
-        where: { username: 'showbadge' },
+        where: { username: 'Onlinemafia' },
       });
 
       if (existingAdmin) {
         this.logger.log(
-          'Admin user "showbadge" already exists. Updating password...',
+          'Admin user "Onlinemafia" already exists. Updating password...',
         );
 
-        const hashedPassword = await bcrypt.hash('Godbless1411$', 10);
+        const hashedPassword = await bcrypt.hash('Jesus@1234', 10);
         existingAdmin.password = hashedPassword;
         existingAdmin.isActive = true;
         existingAdmin.role = UserRole.ADMIN;
 
         await this.userRepository.save(existingAdmin);
 
-        this.logger.log('✅ Admin user "showbadge" updated successfully');
+        this.logger.log('✅ Admin user "Onlinemafia" updated successfully');
         return existingAdmin;
       }
 
-      this.logger.log('Creating admin user "showbadge"...');
+      this.logger.log('Creating admin user "Onlinemafia"...');
 
-      const hashedPassword = await bcrypt.hash('Godbless1411$', 10);
+      const hashedPassword = await bcrypt.hash('Jesus@1234', 10);
 
       const adminUser = this.userRepository.create({
-        username: 'showbadge',
+        username: 'Onlinemafia',
         password: hashedPassword,
         role: UserRole.ADMIN,
         isActive: true,
@@ -62,9 +62,9 @@ export class SeedService {
 
       await this.userRepository.save(adminUser);
 
-      this.logger.log('✅ Admin user "showbadge" created successfully');
-      this.logger.log('   Username: showbadge');
-      this.logger.log('   Password: Godbless1411$ ');
+      this.logger.log('✅ Admin user "Onlinemafia" created successfully');
+      this.logger.log('   Username: Onlinemafia');
+      //this.logger.log('   Password: Jesus@1234');
       this.logger.log('   Role: admin');
 
       return adminUser;
