@@ -9,6 +9,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  const server = app.getHttpServer();
+  // Set timeout to 3 minutes (180,000ms)
+  server.setTimeout(180000);
+
   // Enable CORS
   app.enableCors({
     origin: '*', // WARNING: Allows everyone. Change to your frontend URL in production.
