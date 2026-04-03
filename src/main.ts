@@ -5,18 +5,22 @@ import { AppModule } from './app.module';
 import { SeedService } from './auth/seed/seed.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: true,
+  });
 
   app.setGlobalPrefix('api');
 
-  const server = app.getHttpServer();
-  // Set timeout to 3 minutes (180,000ms)
-  server.setTimeout(180000);
-
   // Enable CORS
   app.enableCors({
-    origin: '*', // WARNING: Allows everyone. Change to your frontend URL in production.
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: [
+      'http://localhost:5173',
+      'https://usersearchapp-org.vercel.app',
+      /\.vercel\.app$/,
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
@@ -44,8 +48,12 @@ async function bootstrap() {
   const seedService = app.get(SeedService);
   await seedService.seedAdminUser();
 
-  await app.listen(3000);
-  console.log('People Search API is running on http://localhost:3000');
-  console.log('API Docs: http://localhost:3000/api');
+  const port = process.env.PORT || 3000;
+  const server = await app.listen(port, '0.0.0.0');
+
+  // IMPORTANT: Increase server timeout to 5 minutes (300 seconds)
+  server.setTimeout(300000); // 300 seconds = 5 minutes
+
+  console.log(`🚀 Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
