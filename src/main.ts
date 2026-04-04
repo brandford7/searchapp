@@ -48,12 +48,9 @@ async function bootstrap() {
   const seedService = app.get(SeedService);
   await seedService.seedAdminUser();
 
-  const port = process.env.PORT || 3000;
-  const server = await app.listen(port, '0.0.0.0');
+   const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
 
-  // IMPORTANT: Increase server timeout to 5 minutes (300 seconds)
-  server.setTimeout(300000); // 300 seconds = 5 minutes
-
-  console.log(`🚀 Application is running on: ${await app.getUrl()}`);
+  console.log(`🚀 Application running on: http://localhost:${port}/api`);
 }
 bootstrap();
