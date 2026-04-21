@@ -24,6 +24,7 @@ export class PeopleService {
       city,
       st,
       zip,
+      ssn,
       page = 1,
       limit = 100,
     } = searchDto;
@@ -89,6 +90,12 @@ export class PeopleService {
       qb.andWhere('p.zip = :zip', { zip });
     }
 
+    if (ssn) {
+      qb.andWhere('p.ssn = :ssn', { ssn });
+    }
+
+    //newly added group by to ensure distinct results based on SSN, which is a unique identifier for individuals. This prevents duplicate entries in the search results when multiple records share the same SSN.
+    qb.groupBy('p.id, p.ssn'); // Group by id and SSN
     // --- Pagination ---
     qb.skip(offset).take(limit);
 

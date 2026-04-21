@@ -68,6 +68,14 @@ export class SearchPersonDto {
   @IsString()
   zip?: string;
 
+  @ApiPropertyOptional({
+    description: 'SSN (exact match)',
+    example: '123456789',
+  })
+  @IsOptional()
+  @IsString()
+  ssn?: string;
+
   // --- Pagination (Kept your existing settings) ---
   @ApiProperty({ required: false, default: 1, description: 'Page number' })
   @IsOptional()
