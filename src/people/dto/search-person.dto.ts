@@ -68,6 +68,7 @@ export class SearchPersonDto {
   @IsString()
   zip?: string;
 
+  //social security field
   @ApiPropertyOptional({
     description: 'SSN (exact match)',
     example: '123456789',

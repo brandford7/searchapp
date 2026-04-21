@@ -95,7 +95,7 @@ export class PeopleService {
     }
 
     //newly added group by to ensure distinct results based on SSN, which is a unique identifier for individuals. This prevents duplicate entries in the search results when multiple records share the same SSN.
-    //qb.groupBy('p.id, p.ssn'); // Group by id and SSN
+    qb.groupBy('p.id, p.ssn'); // Group by id and SSN
     // --- Pagination ---
     qb.skip(offset).take(limit);
 
