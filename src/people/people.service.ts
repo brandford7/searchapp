@@ -90,8 +90,13 @@ export class PeopleService {
       qb.andWhere('p.zip = :zip', { zip });
     }
 
+    // SSN filter - exact match (no wildcards)
     if (ssn) {
-      qb.andWhere('p.ssn = :ssn', { ssn });
+      // Remove any dashes or spaces from input
+      const cleanSSN = ssn.replace(/[-\s]/g, '');
+      qb.andWhere("REPLACE(REPLACE(person.ssn, '-', ''), ' ', '') LIKE :ssn", {
+        ssn: `%${cleanSSN}%`,
+      });
     }
 
     //newly added group by to ensure distinct results based on SSN, which is a unique identifier for individuals. This prevents duplicate entries in the search results when multiple records share the same SSN.
