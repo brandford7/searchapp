@@ -92,15 +92,15 @@ export class PeopleService {
 
     // SSN filter - exact match (no wildcards)
     if (ssn) {
-      // Remove any dashes or spaces from input
       const cleanSSN = ssn.replace(/[-\s]/g, '');
-      qb.andWhere("REPLACE(REPLACE(p.ssn, '-', ''), ' ', '') = :ssn", {
-        ssn: `%${cleanSSN}%`,
-      });
+
+      // 2. Use LIKE with the parameter, but DON'T use REPLACE on the column
+      // This allows the DB to use a standard index if one exists.
+      // If your DB has dashes, use a pattern like this instead:
+      qb.andWhere('p.ssn LIKE :ssn', { ssn: `%${cleanSSN}%` });
     }
 
     //newly added group by to ensure distinct results based on SSN, which is a unique identifier for individuals. This prevents duplicate entries in the search results when multiple records share the same SSN.
-    qb.groupBy('p.id'); // Group by id and SSN
     // --- Pagination ---
     qb.skip(offset).take(limit);
 
