@@ -91,13 +91,13 @@ export class PeopleService {
     }
 
     // SSN filter - exact match (no wildcards)
+    // SSN filter - Exact Match (Highly Optimized)
     if (ssn) {
+      // 1. Strip dashes/spaces from the user's input
       const cleanSSN = ssn.replace(/[-\s]/g, '');
 
-      // 2. Use LIKE with the parameter, but DON'T use REPLACE on the column
-      // This allows the DB to use a standard index if one exists.
-      // If your DB has dashes, use a pattern like this instead:
-      qb.andWhere('p.ssn LIKE :ssn', { ssn: `%${cleanSSN}%` });
+      // 2. Exact match on the database column (Lightning fast)
+      qb.andWhere('p.ssn = :ssn', { ssn: cleanSSN });
     }
 
     //newly added group by to ensure distinct results based on SSN, which is a unique identifier for individuals. This prevents duplicate entries in the search results when multiple records share the same SSN.
