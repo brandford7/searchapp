@@ -94,7 +94,7 @@ export class PeopleService {
     if (ssn) {
       // Remove any dashes or spaces from input
       const cleanSSN = ssn.replace(/[-\s]/g, '');
-      qb.andWhere("REPLACE(REPLACE(p.ssn, '-', ''), ' ', '') LIKE :ssn", {
+      qb.andWhere("REPLACE(REPLACE(p.ssn, '-', ''), ' ', '') = :ssn", {
         ssn: `%${cleanSSN}%`,
       });
     }
